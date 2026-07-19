@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NovaChat</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f2f2f2;
+}
+
+.box{
+width:90%;
+max-width:500px;
+margin:30px auto;
+background:white;
+padding:20px;
+border-radius:15px;
+}
+
+#messages{
+height:300px;
+overflow:auto;
+border:1px solid #ddd;
+padding:10px;
+}
+
+button{
+padding:10px;
+margin:5px;
+border:0;
+border-radius:8px;
+background:#4F8CFF;
+color:white;
+}
+
+input{
+width:70%;
+padding:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>💬 NovaChat</h2>
+
+<h4>کاربر: {{ user }}</h4>
+
+<h3 id="chatWith">کاربر انتخاب نشده</h3>
+
+<div id="users"></div>
+
+<hr>
+
+<div id="messages"></div>
+
+<br>
+
+<input id="text" placeholder="پیام بنویس...">
+
+<button onclick="send()">ارسال</button>
+
+
+</div>
+
+
+<script>
+
+
+let user1="{{ user }}";
+let user2="";
+
+
+
+function selectUser(name){
+
+user2=name;
+
+document.getElementById("chatWith").innerHTML=
+"چت با: "+user2;
+
+load();
+
+}
+
+
+
+function loadUsers(){
+
+fetch("/users")
+.then(r=>r.json())
+.then(data=>{
+
+let box=document.getElementById("users");
+
+box.innerHTML="";
+
+data.forEach(u=>{
+
+if(u.username!=user1){
+
+box.innerHTML+=
+`
+<button onclick="selectUser('${u.username}')">
+${u.username}
+</button>
+`;
+
+}
+
+});
+
+});
+
+}
+
+
+
+
+function load(){
+
+if(user2=="") return;
+
+
+fetch(`/messages?user1=${user1}&user2=${user2}`)
+.then(r=>r.json())
+.then(data=>{
+
+
+let box=document.getElementById("messages");
+
+box.innerHTML="";
+
+
+data.forEach(m=>{
+
+box.innerHTML+=
+`
+<p>
+<b>${m.sender}</b> : ${m.message}
+<br>
+<small>${m.time}</small>
+</p>
+`;
+
+});
+
+
+});
+
+}
+
+
+
+function send(){
+
+
+let msg=document.getElementById("text").value;
+
+
+fetch("/send",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+
+body:JSON.stringify({
+
+sender:user1,
+
+receiver:user2,
+
+message:msg
+
+})
+
+})
+
+
+.then(()=>{
+
+document.getElementById("text").value="";
+
+load();
+
+});
+
+
+}
+
+
+
+setInterval(load,2000);
+
+loadUsers();
+
+
+</script>
+
+
+</body>
+</html>

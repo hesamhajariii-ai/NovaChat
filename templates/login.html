@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login - NovaChat</title>
+</head>
+
+<body>
+
+<h1>Login</h1>
+
+<input id="username" placeholder="Username">
+<br><br>
+
+<input id="password" type="password" placeholder="Password">
+<br><br>
+
+<button onclick="login()">Login</button>
+
+<script>
+
+function login(){
+
+let username=document.getElementById("username").value;
+let password=document.getElementById("password").value;
+
+let form=new FormData();
+
+form.append("username",username);
+form.append("password",password);
+
+fetch("/login",{
+method:"POST",
+body:form
+})
+.then(r=>r.json())
+.then(data=>{
+
+if(data.message=="Login successful"){
+
+localStorage.setItem("username",username);
+
+location.href="/chat";
+
+}else{
+
+alert(data.message);
+
+}
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
